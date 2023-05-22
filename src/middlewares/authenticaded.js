@@ -1,22 +1,25 @@
 const jwt = require("../utils/jwt")
 
 const asureAuth = (req, res, next) => {
-    if (!req.headers.authorization) {
-        return res.status(403).send({ msg: "No tienes autenticación" })
-    }
+    const {authorization} = req.headers
 
-    const token = req.headers.authorization.replace("Bearer ", "")
+    if (!authorization || !authorization.startsWith("Bearer ")) {
+        return res
+                .status(403)
+                .send({ msg: "La petición no tiene la cabecera de autenticación" })
+    }
+    
+    const token = authorization.split(" ")[1]
 
     try {
         const payload = jwt.decoded(token)
-        const { exp } = payload
+        const { expiration_date } = payload
         /* Verificar nombre currentDate o currentData */
-        const currentData = new Date().getTime()
+        const currentTime = new Date().getTime()
         
-        if(exp <= currentData){
-            return res.status(401).send({ msg: "El token ha expirado" })
+        if(expiration_date <= currentTime){
+            return res.status(400).send({ msg: "El token ha expirado" })
         }
-
         req.user = payload
         next()
     } catch (error) {
