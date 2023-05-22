@@ -1,0 +1,15 @@
+const express = require("express")
+const multiparty = require("connect-multiparty")
+const PostController = require("../controllers/post")
+const middleware_authentication = require("../middlewares/authenticaded")
+
+const md_upload = multiparty({ uploadDir : "./uploads/posts"})
+const api = express.Router()
+
+api.post("/new",[middleware_authentication.asureAuth,md_upload],PostController.createPost)
+api.get("/",PostController.getPosts)
+api.get("/category/:category",PostController.getPostByCategory)
+api.get("/:id",PostController.getPost)
+api.get("/search/:search",PostController.getPostBySearch)
+api.put("/:id",[middleware_authentication.asureAuth,md_upload],PostController.updatePost)
+api.delete("/:id"[middleware_authentication.asureAuth,md_upload],PostController.deletePost)
